@@ -5,7 +5,7 @@ var io = require('socket.io')(server);
 var net = require('net');
 var readline = require('readline-sync');
 var Tree = require('easy-tree');
-
+var _ = require('underscore');
 
 var userName = readline.question('May I have your name? ');
 var port = 4000// readline.question('May I have the port to connect? ');
@@ -282,7 +282,7 @@ function constructBoard(destiny, origin, board){
 
     //up
     if(resty>0 && restx==0){
-        var newBoard = board;
+        var newBoard = arrayClone(board);
             for(yd;yd<=yo;yd++){
                 newBoard[yd][xd]=1
             }
@@ -290,7 +290,7 @@ function constructBoard(destiny, origin, board){
     }
     //down
     else if(resty<0 && restx==0){
-        var newBoard = board;
+        var newBoard = arrayClone(board);
             for(yd;yd>=yo;yd--){
                 newBoard[yd][xd]=1
             }
@@ -298,7 +298,7 @@ function constructBoard(destiny, origin, board){
     }
     //left
     else if(resty==0 && restx>0){
-        var newBoard = board;
+        var newBoard = arrayClone(board);
             for(xd;xd<=xo;xd++){
                 newBoard[yd][xd]=1
             }
@@ -306,15 +306,20 @@ function constructBoard(destiny, origin, board){
     }
     //right
     else if(resty==0 && restx<0){
-        var newBoard = board;
+        var newBoard = arrayClone(board);
             for(xd;xd<=xo;xd--){
                 newBoard[yd][xd]=1
             }
         boards.push(newBoard)
     }
+}
 
-    
-
-
-
+function arrayClone(arr) {  
+    if( _.isArray( arr ) ) {
+        return _.map( arr, arrayClone );
+    } else if( typeof arr === 'object' ) {
+        throw 'Cannot clone array containing an object!';
+    } else {
+        return arr;
+    }
 }
