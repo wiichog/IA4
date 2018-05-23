@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "easy-tree": "0.0.3",
     "express": "^4.16.3",
     "readline-sync": "^1.4.9",
     "socket.io": "^2.1.0"

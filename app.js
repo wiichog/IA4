@@ -4,10 +4,14 @@ var server = require('http').Server(app);
 var io = require('socket.io')(server);
 var net = require('net');
 var readline = require('readline-sync');
+var Tree = require('easy-tree');
+
 
 var userName = readline.question('May I have your name? ');
 var port = 4000// readline.question('May I have the port to connect? ');
 var tournamentID = 1221//readline.question('May I have the tournament id? ');
+var tree = new Tree();
+
 
 var socket = require('socket.io-client')("http://127.0.0.1:"+ port +"");  // for example: http://127.0.0.1:3000
 socket.on('connect', function(){
@@ -60,22 +64,24 @@ function moveBy(board,playerTurnID){
     console.log(matrixBoard)
     console.log(playerTurnID)
     if(playerTurnID==1){
-        var validMoves = validMove(matrixBoard,2,1)
+        var returnvalidMoves = validMove(matrixBoard,2,1)
     }
     else if(playerTurnID==2){
-        var validMoves = validMove(matrixBoard,1,2)
+        var returnvalidMoves = validMove(matrixBoard,1,2)
     }
-    console.log(validMoves)
+    constructTree(returnvalidMoves[0],returnvalidMoves[1],matrixBoard)
+    var validMoves = returnvalidMoves[0]
     var random = validMoves[Math.floor(Math.random() * validMoves.length)].split(",")
     var x = parseInt(random[1])
     var y = parseInt(random[0])
     var number = (y *8) +x
-    console.log(number)
+    
     return number
 }
 
 function validMove(matrixBoard,playerTurnID,lookingFor){
     var posibleMoves = []
+    var origins = []
     for(var y=0;y<matrixBoard.length;y++){
         var row = matrixBoard[y]
         for(var x=0;x<row.length;x++){
@@ -92,6 +98,7 @@ function validMove(matrixBoard,playerTurnID,lookingFor){
                             if (looking == null){break}
                             if(looking==lookingFor && !(posibleMoves.includes(""+(y-1).toString()+","+ (x+1).toString() +""))){
                                 posibleMoves.push(""+(y-1).toString()+","+ (x+1).toString() +"")
+                                origins.push(""+(y).toString()+","+ (x).toString() +"")
                                 break
                             }
                             position += 1 
@@ -111,6 +118,7 @@ function validMove(matrixBoard,playerTurnID,lookingFor){
                             if (looking == null){break}
                             if(looking==lookingFor && !(posibleMoves.includes(""+(y-1).toString()+","+ (x).toString() +""))){
                                 posibleMoves.push(""+(y-1).toString()+","+ (x).toString() +"")
+                                origins.push(""+(y).toString()+","+ (x).toString() +"")
                                 break
                             }
                             position += 1 
@@ -130,6 +138,7 @@ function validMove(matrixBoard,playerTurnID,lookingFor){
                             if (looking == null){break}
                             if(looking==lookingFor && !(posibleMoves.includes(""+(y-1).toString()+","+ (x-1).toString() +""))){
                                 posibleMoves.push(""+(y-1).toString()+","+ (x-1).toString() +"")
+                                origins.push(""+(y).toString()+","+ (x).toString() +"")
                                 break
                             }
                             position += 1 
@@ -150,6 +159,7 @@ function validMove(matrixBoard,playerTurnID,lookingFor){
                             if (looking == null){break}
                             if(looking==lookingFor && !(posibleMoves.includes(""+(y).toString()+","+ (x-1).toString() +""))){
                                 posibleMoves.push(""+(y).toString()+","+ (x-1).toString() +"")
+                                origins.push(""+(y).toString()+","+ (x).toString() +"")
                                 break
                             }
                             position += 1 
@@ -169,6 +179,7 @@ function validMove(matrixBoard,playerTurnID,lookingFor){
                             if (looking == null){break}
                             if(looking==lookingFor && !(posibleMoves.includes(""+(y+1).toString()+","+ (x-1).toString() +""))){
                                 posibleMoves.push(""+(y+1).toString()+","+ (x-1).toString() +"")
+                                origins.push(""+(y).toString()+","+ (x).toString() +"")
                                 break
                             }
                             position += 1 
@@ -188,6 +199,7 @@ function validMove(matrixBoard,playerTurnID,lookingFor){
                             if (looking == null){break}
                             if(looking==lookingFor && !(posibleMoves.includes(""+(y+1).toString()+","+ (x).toString() +""))){
                                 posibleMoves.push(""+(y+1).toString()+","+ (x).toString() +"")
+                                origins.push(""+(y).toString()+","+ (x).toString() +"")
                                 break
                             }
                             position += 1 
@@ -207,6 +219,7 @@ function validMove(matrixBoard,playerTurnID,lookingFor){
                             if (looking == null){break}
                             if(looking==lookingFor && !(posibleMoves.includes(""+(y+1).toString()+","+ (x+1).toString() +""))){
                                 posibleMoves.push(""+(y+1).toString()+","+ (x+1).toString() +"")
+                                origins.push(""+(y).toString()+","+ (x).toString() +"")
                                 break
                             }
                             position += 1 
@@ -226,6 +239,7 @@ function validMove(matrixBoard,playerTurnID,lookingFor){
                             if (looking == null){break}
                             if(looking==lookingFor && !(posibleMoves.includes(""+(y).toString()+","+ (x+1).toString() +""))){
                                 posibleMoves.push(""+(y).toString()+","+ (x+1).toString() +"")
+                                origins.push(""+(y).toString()+","+ (x).toString() +"")
                                 break
                             }
                             position += 1 
@@ -235,5 +249,72 @@ function validMove(matrixBoard,playerTurnID,lookingFor){
             }
         }
     }
-    return posibleMoves
+    return [posibleMoves,origins]
+}
+
+function constructTree(moves,origins,actualBoard){
+    console.log("******constructBoard*****")
+    for(var i=0;i<moves.length;i++){
+        constructBoard(moves[i].split(","),origins[i].split(","),actualBoard);
+    }
+}
+
+function constructBoard(destiny, origin, board){
+    paths = []
+    boards = []
+    var xd = destiny[1];
+    var yd = destiny[0];
+    var xo = origin[1];
+    var yo = origin[0];
+    var restx = xo-xd
+    var resty = yo-yd
+
+    board[yd][xd] = 5 
+    console.log(board)
+
+    console.log(yd,xd)
+    console.log(yo,xo)
+
+
+
+    console.log(restx)
+    console.log(resty)
+
+    //up
+    if(resty>0 && restx==0){
+        var newBoard = board;
+            for(yd;yd<=yo;yd++){
+                newBoard[yd][xd]=1
+            }
+        boards.push(newBoard)
+    }
+    //down
+    else if(resty<0 && restx==0){
+        var newBoard = board;
+            for(yd;yd>=yo;yd--){
+                newBoard[yd][xd]=1
+            }
+        boards.push(newBoard)
+    }
+    //left
+    else if(resty==0 && restx>0){
+        var newBoard = board;
+            for(xd;xd<=xo;xd++){
+                newBoard[yd][xd]=1
+            }
+        boards.push(newBoard)
+    }
+    //right
+    else if(resty==0 && restx<0){
+        var newBoard = board;
+            for(xd;xd<=xo;xd--){
+                newBoard[yd][xd]=1
+            }
+        boards.push(newBoard)
+    }
+
+    
+
+
+
 }
