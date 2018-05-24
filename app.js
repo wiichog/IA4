@@ -69,7 +69,7 @@ function moveBy(board,playerTurnID){
     else if(playerTurnID==2){
         var returnvalidMoves = validMove(matrixBoard,1,2)
     }
-    constructTree(returnvalidMoves[0],returnvalidMoves[1],matrixBoard)
+    constructTree(returnvalidMoves[0],returnvalidMoves[1],matrixBoard,playerTurnID)
     var validMoves = returnvalidMoves[0]
     var random = validMoves[Math.floor(Math.random() * validMoves.length)].split(",")
     var x = parseInt(random[1])
@@ -98,7 +98,7 @@ function validMove(matrixBoard,playerTurnID,lookingFor){
                             if (looking == null){break}
                             if(looking==lookingFor && !(posibleMoves.includes(""+(y-1).toString()+","+ (x+1).toString() +""))){
                                 posibleMoves.push(""+(y-1).toString()+","+ (x+1).toString() +"")
-                                origins.push(""+(y).toString()+","+ (x).toString() +"")
+                                origins.push(""+(y+position).toString()+","+ (x-position).toString() +"")
                                 break
                             }
                             position += 1 
@@ -118,7 +118,7 @@ function validMove(matrixBoard,playerTurnID,lookingFor){
                             if (looking == null){break}
                             if(looking==lookingFor && !(posibleMoves.includes(""+(y-1).toString()+","+ (x).toString() +""))){
                                 posibleMoves.push(""+(y-1).toString()+","+ (x).toString() +"")
-                                origins.push(""+(y).toString()+","+ (x).toString() +"")
+                                origins.push(""+(y+position).toString()+","+ (x).toString() +"")
                                 break
                             }
                             position += 1 
@@ -138,7 +138,7 @@ function validMove(matrixBoard,playerTurnID,lookingFor){
                             if (looking == null){break}
                             if(looking==lookingFor && !(posibleMoves.includes(""+(y-1).toString()+","+ (x-1).toString() +""))){
                                 posibleMoves.push(""+(y-1).toString()+","+ (x-1).toString() +"")
-                                origins.push(""+(y).toString()+","+ (x).toString() +"")
+                                origins.push(""+(y+position).toString()+","+ (x+position).toString() +"")
                                 break
                             }
                             position += 1 
@@ -159,7 +159,7 @@ function validMove(matrixBoard,playerTurnID,lookingFor){
                             if (looking == null){break}
                             if(looking==lookingFor && !(posibleMoves.includes(""+(y).toString()+","+ (x-1).toString() +""))){
                                 posibleMoves.push(""+(y).toString()+","+ (x-1).toString() +"")
-                                origins.push(""+(y).toString()+","+ (x).toString() +"")
+                                origins.push(""+(y).toString()+","+ (x+position).toString() +"")
                                 break
                             }
                             position += 1 
@@ -179,7 +179,7 @@ function validMove(matrixBoard,playerTurnID,lookingFor){
                             if (looking == null){break}
                             if(looking==lookingFor && !(posibleMoves.includes(""+(y+1).toString()+","+ (x-1).toString() +""))){
                                 posibleMoves.push(""+(y+1).toString()+","+ (x-1).toString() +"")
-                                origins.push(""+(y).toString()+","+ (x).toString() +"")
+                                origins.push(""+(y-position).toString()+","+ (x+position).toString() +"")
                                 break
                             }
                             position += 1 
@@ -199,7 +199,7 @@ function validMove(matrixBoard,playerTurnID,lookingFor){
                             if (looking == null){break}
                             if(looking==lookingFor && !(posibleMoves.includes(""+(y+1).toString()+","+ (x).toString() +""))){
                                 posibleMoves.push(""+(y+1).toString()+","+ (x).toString() +"")
-                                origins.push(""+(y).toString()+","+ (x).toString() +"")
+                                origins.push(""+(y-position).toString()+","+ (x).toString() +"")
                                 break
                             }
                             position += 1 
@@ -219,7 +219,7 @@ function validMove(matrixBoard,playerTurnID,lookingFor){
                             if (looking == null){break}
                             if(looking==lookingFor && !(posibleMoves.includes(""+(y+1).toString()+","+ (x+1).toString() +""))){
                                 posibleMoves.push(""+(y+1).toString()+","+ (x+1).toString() +"")
-                                origins.push(""+(y).toString()+","+ (x).toString() +"")
+                                origins.push(""+(y-position).toString()+","+ (x-position).toString() +"")
                                 break
                             }
                             position += 1 
@@ -239,7 +239,7 @@ function validMove(matrixBoard,playerTurnID,lookingFor){
                             if (looking == null){break}
                             if(looking==lookingFor && !(posibleMoves.includes(""+(y).toString()+","+ (x+1).toString() +""))){
                                 posibleMoves.push(""+(y).toString()+","+ (x+1).toString() +"")
-                                origins.push(""+(y).toString()+","+ (x).toString() +"")
+                                origins.push(""+(y).toString()+","+ (x-position).toString() +"")
                                 break
                             }
                             position += 1 
@@ -252,74 +252,128 @@ function validMove(matrixBoard,playerTurnID,lookingFor){
     return [posibleMoves,origins]
 }
 
-function constructTree(moves,origins,actualBoard){
+function constructTree(moves,origins,actualBoard,playerTurnID){
     console.log("******constructBoard*****")
+    var newboards = []
+    console.log(moves)
+    console.log(origins)
+    console.log(actualBoard)
     for(var i=0;i<moves.length;i++){
-        constructBoard(moves[i].split(","),origins[i].split(","),actualBoard);
+        newboards.push(constructBoard(moves[i].split(","),origins[i].split(","),actualBoard,playerTurnID));
     }
 }
 
-function constructBoard(destiny, origin, board){
+function constructBoard(destiny, origin, board,playerTurnID){
     paths = []
-    boards = []
     var xd = destiny[1];
     var yd = destiny[0];
     var xo = origin[1];
     var yo = origin[0];
     var restx = xo-xd
     var resty = yo-yd
-
-    board[yd][xd] = 5 
-    console.log(board)
-
-    console.log(yd,xd)
-    console.log(yo,xo)
-
-
-
-    console.log(restx)
-    console.log(resty)
-
     //up
     if(resty>0 && restx==0){
-        var newBoard = arrayClone(board);
+        console.log("up")
+        var newBoard = clone(board);
             for(yd;yd<=yo;yd++){
-                newBoard[yd][xd]=1
+                newBoard[yd][xd]=playerTurnID
             }
-        boards.push(newBoard)
+        console.log(newBoard)
+        return newBoard;
     }
     //down
     else if(resty<0 && restx==0){
-        var newBoard = arrayClone(board);
+        console.log("down")
+        var newBoard = clone(board);
             for(yd;yd>=yo;yd--){
-                newBoard[yd][xd]=1
+                newBoard[yd][xd]=playerTurnID
             }
-        boards.push(newBoard)
+        console.log(newBoard)
+        return newBoard;
     }
     //left
     else if(resty==0 && restx>0){
-        var newBoard = arrayClone(board);
+        console.log("left")
+        var newBoard = clone(board);
             for(xd;xd<=xo;xd++){
-                newBoard[yd][xd]=1
+                newBoard[yd][xd]=playerTurnID
             }
-        boards.push(newBoard)
+        console.log(newBoard)
+        return newBoard;
     }
     //right
     else if(resty==0 && restx<0){
-        var newBoard = arrayClone(board);
-            for(xd;xd<=xo;xd--){
-                newBoard[yd][xd]=1
+        console.log("right")
+        var newBoard = clone(board);
+            for(xd;xd>=xo;xd--){
+                newBoard[yd][xd]=playerTurnID
             }
-        boards.push(newBoard)
+            console.log(newBoard)
+        return newBoard;
+    }
+    //upperRight
+    else if(resty>0 && restx<0){
+        console.log("upperRight")
+        var newBoard = clone(board);
+        while(true){
+            newBoard[yd][xd]=playerTurnID
+            xd--
+            yd++
+            if(xd==xo && yd==yo){
+                break;
+            }
+        }
+        console.log(newBoard)
+        return newBoard;
+    }
+
+    //UpperLeft
+    else if(resty>0 && restx>0){
+        console.log("UpperLeft")
+        var newBoard = clone(board);
+        while(true){
+            newBoard[yd][xd]=playerTurnID
+            xd++
+            yd++
+            if(xd==xo && yd==yo){
+                break;
+            }
+        }
+        console.log(newBoard)
+        return newBoard;
+    }
+    //LowerRight
+    else if(resty<0 && restx<0){
+        console.log("LowerRight")
+        var newBoard = clone(board);
+        while(true){
+            newBoard[yd][xd]=playerTurnID
+            xd--
+            yd--
+            if(xd==xo && yd==yo){
+                break;
+            }
+        }
+        console.log(newBoard)
+        return newBoard;
+    }
+    //LowerLeft
+    else if(resty<0 && restx>0){
+        console.log("LowerLeft")
+        var newBoard = clone(board);
+        while(true){
+            newBoard[yd][xd]=playerTurnID
+            xd++
+            yd--
+            if(xd==xo && yd==yo){
+                break;
+            }
+        }
+        console.log(newBoard)
+        return newBoard;
     }
 }
 
-function arrayClone(arr) {  
-    if( _.isArray( arr ) ) {
-        return _.map( arr, arrayClone );
-    } else if( typeof arr === 'object' ) {
-        throw 'Cannot clone array containing an object!';
-    } else {
-        return arr;
-    }
-}
+function clone(a) {
+    return JSON.parse(JSON.stringify(a));
+ }
