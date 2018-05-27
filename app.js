@@ -4,13 +4,12 @@ var server = require('http').Server(app);
 var io = require('socket.io')(server);
 var net = require('net');
 var readline = require('readline-sync');
-var Tree = require('easy-tree');
-var _ = require('underscore');
+var TreeNode = require('treenode').TreeNode;
 
 var userName = readline.question('May I have your name? ');
 var port = 4000// readline.question('May I have the port to connect? ');
 var tournamentID = 1221//readline.question('May I have the tournament id? ');
-var tree = new Tree();
+
 
 
 var socket = require('socket.io-client')("http://127.0.0.1:"+ port +"");  // for example: http://127.0.0.1:3000
@@ -55,21 +54,15 @@ socket.on('finish', function(data){
     });
   });
 
+
 function moveBy(board,playerTurnID){
-    console.log("********************************")
     var matrixBoard = []
     for(var i=0; i<board.length; i+= 8){
         matrixBoard.push(board.slice(i,i+8))
     }
-    console.log(matrixBoard)
-    console.log(playerTurnID)
-    if(playerTurnID==1){
-        var returnvalidMoves = validMove(matrixBoard,2,1)
-    }
-    else if(playerTurnID==2){
-        var returnvalidMoves = validMove(matrixBoard,1,2)
-    }
-    constructTree(returnvalidMoves[0],returnvalidMoves[1],matrixBoard,playerTurnID)
+    
+    constructTree(matrixBoard,playerTurnID)
+
     var validMoves = returnvalidMoves[0]
     var random = validMoves[Math.floor(Math.random() * validMoves.length)].split(",")
     var x = parseInt(random[1])
@@ -79,7 +72,61 @@ function moveBy(board,playerTurnID){
     return number
 }
 
-function validMove(matrixBoard,playerTurnID,lookingFor){
+function constructTree(board,playerTurnID){
+    var firstplayerTurnID = playerTurnID;
+    var tree = new TreeNode({id: 0, name: board, parent: -1});
+    var firstBoard =  tree.data.name;
+    var validMovesFB = validMove(firstBoard,playerTurnID);
+    var boards = newBoards(validMovesFB[0],validMovesFB[1],firstBoard,playerTurnID);
+    var counter = 1;
+    var parents = []
+    for(var i=0;i<boards.length;i++){
+        tree.addChild({id: counter, name: boards[i], parent: 0});
+        parents.push(counter)
+        counter += 1;
+    }
+    tree.forEach(function(node) {
+        if(node.data.parent==0){
+            var childBoard = node.data.name;
+            if(playerTurnID==1){
+                playerTurnID=2
+            }
+            else if(playerTurnID==2){
+                playerTurnID=1
+            }
+            var validMovesCB = validMove(childBoard,playerTurnID);
+            var boardsCB = newBoards(validMovesFB[0],validMovesFB[1],firstBoard,playerTurnID);
+            for(var j=0;j<boardsCB.length;j++){//second level
+                node.addChild({id:counter,name:boardsCB[j],parent:node.data.id});
+                counter += 1;
+            }
+        }
+    });
+    console.log(parents)
+    tree.forEach(function(node){
+        console.log(node.data.id)
+        console.log(node.data.parent)
+        if(node.data.id!=0){
+            if(!(parents.includes(node.data.parent))){
+                console.log("this is the parent node id " + node.data.id)
+                node.forEach(function(child){
+                    //if(!(parents.includes(node.data.id))){
+                        console.log("this is the son node id " + child.data.id)
+                   // }
+                })
+            }
+        }
+    })
+
+}
+
+function validMove(matrixBoard,lookingFor){
+    if(lookingFor==1){
+        var playerTurnID = 2
+    }
+    else if(lookingFor==2){
+        var playerTurnID = 1
+    }
     var posibleMoves = []
     var origins = []
     for(var y=0;y<matrixBoard.length;y++){
@@ -252,15 +299,12 @@ function validMove(matrixBoard,playerTurnID,lookingFor){
     return [posibleMoves,origins]
 }
 
-function constructTree(moves,origins,actualBoard,playerTurnID){
-    console.log("******constructBoard*****")
+function newBoards(moves,origins,actualBoard,playerTurnID){
     var newboards = []
-    console.log(moves)
-    console.log(origins)
-    console.log(actualBoard)
     for(var i=0;i<moves.length;i++){
         newboards.push(constructBoard(moves[i].split(","),origins[i].split(","),actualBoard,playerTurnID));
     }
+    return newboards
 }
 
 function constructBoard(destiny, origin, board,playerTurnID){
@@ -273,47 +317,38 @@ function constructBoard(destiny, origin, board,playerTurnID){
     var resty = yo-yd
     //up
     if(resty>0 && restx==0){
-        console.log("up")
         var newBoard = clone(board);
             for(yd;yd<=yo;yd++){
                 newBoard[yd][xd]=playerTurnID
             }
-        console.log(newBoard)
-        return newBoard;
+        return [newBoard,count(newBoard,playerTurnID)];
     }
     //down
     else if(resty<0 && restx==0){
-        console.log("down")
         var newBoard = clone(board);
             for(yd;yd>=yo;yd--){
                 newBoard[yd][xd]=playerTurnID
             }
-        console.log(newBoard)
-        return newBoard;
+        return [newBoard,count(newBoard,playerTurnID)];
     }
     //left
     else if(resty==0 && restx>0){
-        console.log("left")
         var newBoard = clone(board);
             for(xd;xd<=xo;xd++){
                 newBoard[yd][xd]=playerTurnID
             }
-        console.log(newBoard)
-        return newBoard;
+        return [newBoard,count(newBoard,playerTurnID)];
     }
     //right
     else if(resty==0 && restx<0){
-        console.log("right")
         var newBoard = clone(board);
             for(xd;xd>=xo;xd--){
                 newBoard[yd][xd]=playerTurnID
             }
-            console.log(newBoard)
-        return newBoard;
+        return [newBoard,count(newBoard,playerTurnID)];
     }
     //upperRight
     else if(resty>0 && restx<0){
-        console.log("upperRight")
         var newBoard = clone(board);
         while(true){
             newBoard[yd][xd]=playerTurnID
@@ -323,13 +358,11 @@ function constructBoard(destiny, origin, board,playerTurnID){
                 break;
             }
         }
-        console.log(newBoard)
-        return newBoard;
+        return [newBoard,count(newBoard,playerTurnID)];
     }
 
     //UpperLeft
     else if(resty>0 && restx>0){
-        console.log("UpperLeft")
         var newBoard = clone(board);
         while(true){
             newBoard[yd][xd]=playerTurnID
@@ -339,12 +372,10 @@ function constructBoard(destiny, origin, board,playerTurnID){
                 break;
             }
         }
-        console.log(newBoard)
-        return newBoard;
+        return [newBoard,count(newBoard,playerTurnID)];
     }
     //LowerRight
     else if(resty<0 && restx<0){
-        console.log("LowerRight")
         var newBoard = clone(board);
         while(true){
             newBoard[yd][xd]=playerTurnID
@@ -354,12 +385,10 @@ function constructBoard(destiny, origin, board,playerTurnID){
                 break;
             }
         }
-        console.log(newBoard)
-        return newBoard;
+        return [newBoard,count(newBoard,playerTurnID)];
     }
     //LowerLeft
     else if(resty<0 && restx>0){
-        console.log("LowerLeft")
         var newBoard = clone(board);
         while(true){
             newBoard[yd][xd]=playerTurnID
@@ -369,10 +398,23 @@ function constructBoard(destiny, origin, board,playerTurnID){
                 break;
             }
         }
-        console.log(newBoard)
-        return newBoard;
+        return [newBoard,count(newBoard,playerTurnID)];
     }
 }
+
+function count(board,playerTurnID){
+    var counter = 0
+    for(var y=0;y<board.length;y++){
+        var row = board[y];
+        for(var x=0; x<row.length;x++){
+            if(board[y][x]==playerTurnID){
+                counter++
+            }
+        }
+    }
+    return counter
+}
+
 
 function clone(a) {
     return JSON.parse(JSON.stringify(a));
