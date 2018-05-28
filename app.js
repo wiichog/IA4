@@ -138,20 +138,18 @@ function constructTree(board,playerTurnID){
     })
     
 
-    console.log(parents)
-    console.log(validTF)
     tree.forEach(function(node){
         if(node.data.id!=0){
-            console.log("node id " + node.data.id)
-            console.log(node.data.name)
             if(parents.includes(node.data.parent)){
                 node.forEach(function(child){
                     if(!(parents.includes(child.data.id)) && !(validTF.includes(child.data.id))){
-                        console.log("child id " + child.data.id)
-                        console.log(child.data.name)
                         var newBoardFF = child.data.name[0];
                         var validMovesFF = validMove(newBoardFF,opplayerTurnID);
-                        console.log(validMovesFF)
+                        var boardsFF = newBoards(validMovesFF[0],validMovesFF[1],newBoardFF,opplayerTurnID);
+                        for(var q=0;q<boardsFF.length;q++){//fourth
+                            child.addChild({id:counter,name:boardsFF[q],parent:node.data.id});
+                            counter += 1;
+                        }
                     }
                 })
             }
@@ -342,104 +340,176 @@ function validMove(matrixBoard,lookingFor){
 function newBoards(moves,origins,actualBoard,playerTurnID){
     var newboards = []
     for(var i=0;i<moves.length;i++){
-        newboards.push(constructBoard(moves[i].split(","),origins[i].split(","),actualBoard,playerTurnID));
+        newboards.push(constructBoard(moves[i].split(","),actualBoard,playerTurnID));
     }
     return newboards
 }
 
-function constructBoard(destiny, origin, board,playerTurnID){
+function constructBoard(destiny, originalBoard,playerTurnID){
+    var board = clone(originalBoard)
     paths = []
-    var xd = destiny[1];
-    var yd = destiny[0];
-    var xo = origin[1];
-    var yo = origin[0];
-    var restx = xo-xd
-    var resty = yo-yd
+    //return [newBoard,count(newBoard,playerTurnID)]
+    var x = parseInt(destiny[1]);
+    var y = parseInt(destiny[0]);
+    //console.log("*************************")
     //up
-    if(resty>0 && restx==0){
-        var newBoard = clone(board);
-            for(yd;yd<=yo;yd++){
-                newBoard[yd][xd]=playerTurnID
-            }
-        return [newBoard,count(newBoard,playerTurnID)];
-    }
-    //down
-    else if(resty<0 && restx==0){
-        var newBoard = clone(board);
-            for(yd;yd>=yo;yd--){
-                newBoard[yd][xd]=playerTurnID
-            }
-        return [newBoard,count(newBoard,playerTurnID)];
-    }
-    //left
-    else if(resty==0 && restx>0){
-        var newBoard = clone(board);
-            for(xd;xd<=xo;xd++){
-                newBoard[yd][xd]=playerTurnID
-            }
-        return [newBoard,count(newBoard,playerTurnID)];
-    }
-    //right
-    else if(resty==0 && restx<0){
-        var newBoard = clone(board);
-            for(xd;xd>=xo;xd--){
-                newBoard[yd][xd]=playerTurnID
-            }
-        return [newBoard,count(newBoard,playerTurnID)];
-    }
-    //upperRight
-    else if(resty>0 && restx<0){
-        var newBoard = clone(board);
-        while(true){
-            newBoard[yd][xd]=playerTurnID
-            xd--
-            yd++
-            if(xd==xo && yd==yo){
+    var positions = []
+    var position = 1
+    //console.log(board)
+    //console.log(destiny)
+    //console.log(playerTurnID)
+    positions.push(""+(y).toString()+","+(x).toString()+"")
+    while(true){
+        try{
+            var newPosition = board[y-position][x];
+            positions.push(""+(y-position).toString()+","+(x).toString()+"")
+            position= position +1
+            if(newPosition==playerTurnID){
+                for(var i=0;i<positions.length;i++){
+                    var coords = positions[i].split(",")
+                    board[coords[0]][coords[1]] = playerTurnID
+                }
                 break;
             }
-        }
-        return [newBoard,count(newBoard,playerTurnID)];
+        }catch(err) {break;}
+    }
+    //Down
+    var position = 1
+    positions.length = 0;
+    positions.push(""+(y).toString()+","+(x).toString()+"")
+    while(true){
+        try{
+            var newPosition = board[y+position][x];
+            positions.push(""+(y+position).toString()+","+(x).toString()+"")
+            position= position +1
+            if(newPosition==playerTurnID){
+                for(var i=0;i<positions.length;i++){
+                    var coords = positions[i].split(",")
+                    board[coords[0]][coords[1]] = playerTurnID
+                }
+                break;
+            }
+        }catch(err) {break;}
     }
 
-    //UpperLeft
-    else if(resty>0 && restx>0){
-        var newBoard = clone(board);
-        while(true){
-            newBoard[yd][xd]=playerTurnID
-            xd++
-            yd++
-            if(xd==xo && yd==yo){
+
+    //right
+    var position = 1
+    positions.length = 0;
+    positions.push(""+(y).toString()+","+(x).toString()+"")
+    while(true){
+        try{
+            var newPosition = board[y][x+position];
+            if(newPosition==null){break;}
+            positions.push(""+(y).toString()+","+(x+position).toString()+"")
+            position= position +1
+            if(newPosition==playerTurnID){
+                for(var i=0;i<positions.length;i++){
+                    var coords = positions[i].split(",")
+                    board[coords[0]][coords[1]] = playerTurnID
+                }
                 break;
             }
-        }
-        return [newBoard,count(newBoard,playerTurnID)];
+        }catch(err) {break;}
+    }
+    //left
+    var position = 1
+    positions.length = 0;
+    positions.push(""+(y).toString()+","+(x).toString()+"")
+    while(true){
+        try{
+            var newPosition = board[y][x-position];
+            if(newPosition==null){break;}
+            positions.push(""+(y).toString()+","+(x-position).toString()+"")
+            position= position +1
+            if(newPosition==playerTurnID){
+                for(var i=0;i<positions.length;i++){
+                    var coords = positions[i].split(",")
+                    board[coords[0]][coords[1]] = playerTurnID
+                }
+                break;
+            }
+        }catch(err) {break;}
+    }
+    //UpperRight
+    var position = 1
+    positions.length = 0;
+    positions.push(""+(y).toString()+","+(x).toString()+"")
+    while(true){
+        try{
+            var newPosition = board[y-position][x+position];
+            if(newPosition==null){break;}
+            positions.push(""+(y-position).toString()+","+(x+position).toString()+"")
+            position= position +1
+            if(newPosition==playerTurnID){
+                for(var i=0;i<positions.length;i++){
+                    var coords = positions[i].split(",")
+                    board[coords[0]][coords[1]] = playerTurnID
+                }
+                break;
+            }
+        }catch(err) {break;}
+    }
+    //UpperLeft
+    var position = 1
+    positions.length = 0;
+    positions.push(""+(y).toString()+","+(x).toString()+"")
+    while(true){
+        try{
+            var newPosition = board[y-position][x-position];
+            if(newPosition==null){break;}
+            positions.push(""+(y-position).toString()+","+(x-position).toString()+"")
+            position= position +1
+            if(newPosition==playerTurnID){
+                for(var i=0;i<positions.length;i++){
+                    var coords = positions[i].split(",")
+                    board[coords[0]][coords[1]] = playerTurnID
+                }
+                break;
+            }
+        }catch(err) {break;}
     }
     //LowerRight
-    else if(resty<0 && restx<0){
-        var newBoard = clone(board);
-        while(true){
-            newBoard[yd][xd]=playerTurnID
-            xd--
-            yd--
-            if(xd==xo && yd==yo){
+    var position = 1
+    positions.length = 0;
+    positions.push(""+(y).toString()+","+(x).toString()+"")
+    while(true){
+        try{
+            var newPosition = board[y+position][x+position];
+            if(newPosition==null){break;}
+            positions.push(""+(y+position).toString()+","+(x+position).toString()+"")
+            position= position +1
+            if(newPosition==playerTurnID){
+                for(var i=0;i<positions.length;i++){
+                    var coords = positions[i].split(",")
+                    board[coords[0]][coords[1]] = playerTurnID
+                }
                 break;
             }
-        }
-        return [newBoard,count(newBoard,playerTurnID)];
+        }catch(err) {break;}
     }
     //LowerLeft
-    else if(resty<0 && restx>0){
-        var newBoard = clone(board);
-        while(true){
-            newBoard[yd][xd]=playerTurnID
-            xd++
-            yd--
-            if(xd==xo && yd==yo){
+    var position = 1
+    positions.length = 0;
+    positions.push(""+(y).toString()+","+(x).toString()+"")
+    while(true){
+        try{
+            var newPosition = board[y+position][x-position];
+            if(newPosition==null){break;}
+            positions.push(""+(y+position).toString()+","+(x-position).toString()+"")
+            position= position +1
+            if(newPosition==playerTurnID){
+                for(var i=0;i<positions.length;i++){
+                    var coords = positions[i].split(",")
+                    board[coords[0]][coords[1]] = playerTurnID
+                }
                 break;
             }
-        }
-        return [newBoard,count(newBoard,playerTurnID)];
+        }catch(err) {break;}
     }
+    //console.log(board)
+    //console.log("*************************")
+    return [board,count(board,playerTurnID)]
 }
 
 function count(board,playerTurnID){
