@@ -119,21 +119,15 @@ function constructTree(board,playerTurnID){
         }
     })
     
-
-
     tree.forEach(function(node){
         if(node.data.id!=0){
             if(!(parents.includes(node.data.parent))){
                 node.forEach(function(child){
                     if(!(parents.includes(child.data.id)) && validTF.includes(child.data.id)){
-                        console.log("this is the son id " + child.data.id)
                         var newBoardTF = child.data.name[0];
-                        console.log(newBoardTF)
                         var validMovesTF = validMove(newBoardTF,playerTurnID);
                         var boardsTF = newBoards(validMovesTF[0],validMovesTF[1],newBoardTF,playerTurnID);
                         for(var r=0;r<boardsTF.length;r++){//third
-                            console.log(boardsTF[r])
-                            console.log("counter inside TF "+counter)
                             child.addChild({id:counter,name:boardsTF[r],parent:child.data.id});
                             counter += 1;
                         }
@@ -142,6 +136,28 @@ function constructTree(board,playerTurnID){
             }
         }
     })
+    
+
+    console.log(parents)
+    console.log(validTF)
+    tree.forEach(function(node){
+        if(node.data.id!=0){
+            console.log("node id " + node.data.id)
+            console.log(node.data.name)
+            if(parents.includes(node.data.parent)){
+                node.forEach(function(child){
+                    if(!(parents.includes(child.data.id)) && !(validTF.includes(child.data.id))){
+                        console.log("child id " + child.data.id)
+                        console.log(child.data.name)
+                        var newBoardFF = child.data.name[0];
+                        var validMovesFF = validMove(newBoardFF,opplayerTurnID);
+                        console.log(validMovesFF)
+                    }
+                })
+            }
+        }
+    })
+
 }
 
 function validMove(matrixBoard,lookingFor){
