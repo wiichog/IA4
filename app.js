@@ -9,7 +9,7 @@ var TreeNode = require('treenode').TreeNode;
 var userName = readline.question('May I have your name? ');
 var port = 4000// readline.question('May I have the port to connect? ');
 var tournamentID = 1221//readline.question('May I have the tournament id? ');
-
+var fs = require('fs');
 
 
 var socket = require('socket.io-client')("http://127.0.0.1:"+ port +"");  // for example: http://127.0.0.1:3000
@@ -73,51 +73,75 @@ function moveBy(board,playerTurnID){
 }
 
 function constructTree(board,playerTurnID){
-    var firstplayerTurnID = playerTurnID;
-    var tree = new TreeNode({id: 0, name: board, parent: -1});
+    if(playerTurnID==1){
+        var opplayerTurnID=2
+    }
+    else if(playerTurnID==2){
+        var opplayerTurnID=1
+    }
+    var tree = new TreeNode({id: 0, name: board, parent: -1}); //root 0 level
     var firstBoard =  tree.data.name;
     var validMovesFB = validMove(firstBoard,playerTurnID);
     var boards = newBoards(validMovesFB[0],validMovesFB[1],firstBoard,playerTurnID);
     var counter = 1;
     var parents = []
+    
     for(var i=0;i<boards.length;i++){
-        tree.addChild({id: counter, name: boards[i], parent: 0});
+        tree.addChild({id: counter, name: boards[i], parent: 0});//first level
         parents.push(counter)
         counter += 1;
     }
+
+    
+
     tree.forEach(function(node) {
         if(node.data.parent==0){
-            var childBoard = node.data.name;
-            if(playerTurnID==1){
-                playerTurnID=2
-            }
-            else if(playerTurnID==2){
-                playerTurnID=1
-            }
-            var validMovesCB = validMove(childBoard,playerTurnID);
-            var boardsCB = newBoards(validMovesFB[0],validMovesFB[1],firstBoard,playerTurnID);
+            var childBoard = node.data.name[0];
+            var validMovesCB = validMove(childBoard,opplayerTurnID);
+            var boardsCB = newBoards(validMovesCB[0],validMovesCB[1],childBoard,opplayerTurnID);
             for(var j=0;j<boardsCB.length;j++){//second level
                 node.addChild({id:counter,name:boardsCB[j],parent:node.data.id});
                 counter += 1;
             }
         }
     });
-    console.log(parents)
+
+    var validTF = []
     tree.forEach(function(node){
-        console.log(node.data.id)
-        console.log(node.data.parent)
         if(node.data.id!=0){
             if(!(parents.includes(node.data.parent))){
-                console.log("this is the parent node id " + node.data.id)
                 node.forEach(function(child){
-                    //if(!(parents.includes(node.data.id))){
-                        console.log("this is the son node id " + child.data.id)
-                   // }
+                    if(!(parents.includes(child.data.id))){
+                        validTF.push(child.data.id)
+                    }
                 })
             }
         }
     })
+    
 
+
+    tree.forEach(function(node){
+        if(node.data.id!=0){
+            if(!(parents.includes(node.data.parent))){
+                node.forEach(function(child){
+                    if(!(parents.includes(child.data.id)) && validTF.includes(child.data.id)){
+                        console.log("this is the son id " + child.data.id)
+                        var newBoardTF = child.data.name[0];
+                        console.log(newBoardTF)
+                        var validMovesTF = validMove(newBoardTF,playerTurnID);
+                        var boardsTF = newBoards(validMovesTF[0],validMovesTF[1],newBoardTF,playerTurnID);
+                        for(var r=0;r<boardsTF.length;r++){//third
+                            console.log(boardsTF[r])
+                            console.log("counter inside TF "+counter)
+                            child.addChild({id:counter,name:boardsTF[r],parent:child.data.id});
+                            counter += 1;
+                        }
+                    }
+                })
+            }
+        }
+    })
 }
 
 function validMove(matrixBoard,lookingFor){
