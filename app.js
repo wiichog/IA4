@@ -137,24 +137,28 @@ function constructTree(board,playerTurnID){
         }
     })
     
-
+    var newChilds = []
     tree.forEach(function(node){
         if(node.data.id!=0){
             if(parents.includes(node.data.parent)){
                 node.forEach(function(child){
-                    if(!(parents.includes(child.data.id)) && !(validTF.includes(child.data.id))){
+                    if(!(parents.includes(child.data.id)) && !(validTF.includes(child.data.id)) && !(newChilds.includes(child.data.id))){
                         var newBoardFF = child.data.name[0];
                         var validMovesFF = validMove(newBoardFF,opplayerTurnID);
                         var boardsFF = newBoards(validMovesFF[0],validMovesFF[1],newBoardFF,opplayerTurnID);
+                        totalHijos += boardsFF.length
                         for(var q=0;q<boardsFF.length;q++){//fourth
                             child.addChild({id:counter,name:boardsFF[q],parent:node.data.id});
                             counter += 1;
+                            newChilds.push(counter)
                         }
                     }
                 })
             }
         }
     })
+    
+
 
 }
 
