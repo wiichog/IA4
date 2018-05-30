@@ -66,7 +66,6 @@ function moveBy(board,playerTurnID){
     var x = parseInt(random[1])
     var y = parseInt(random[0])
     var number = (y *8) +x
-    console.log(number)
     return number
 }
 
@@ -144,251 +143,264 @@ function constructTree(board,playerTurnID){
     var tree = new TreeNode({id: 0, name: board, parent: -1}); //root 0 level
     var firstBoard =  tree.data.name;
     var validMovesFB = validMove(firstBoard,playerTurnID);
-    
+    console.log(validMovesFB)
     var counter = 1;
     var parents = []
     if(validMovesFB.length>0){
         level = 1
         var boards = newBoards(validMovesFB,firstBoard,playerTurnID);
         for(var i=0;i<boards.length;i++){
-            tree.addChild({id: counter, name: boards[i], parent: 0,level:1,heuristic:0,move:validMovesFB[i]});//first level
+            tree.addChild({id: counter, name: boards[i], parent: 0,level:1,heuristic:100,move:validMovesFB[i],alpha:100,beta:-100});//first level
             parents.push(counter)
             counter += 1;
         }
     }
-    var childsSF = []
-    tree.forEach(function(node){
-        if(node.data.level==1){
-            level = 2
-            var nodeBoardSF = node.data.name;
-            var validMovesSF = validMove(nodeBoardSF,opplayerTurnID);
-            if(validMovesSF.length>0){
-                var boardsSF = newBoards(validMovesSF,nodeBoardSF,opplayerTurnID);
-                for(var j=0;j<boardsSF.length;j++){//second level
-                    node.addChild({id:counter,name:boardsSF[j],parent:node.data.id,level:2,heuristic:0,move:validMovesSF[i]});
-                    counter += 1;
+    if(level==1){
+        var childsSF = []
+        tree.forEach(function(node){
+            if(node.data.level==1){
+                level = 2
+                var nodeBoardSF = node.data.name;
+                var validMovesSF = validMove(nodeBoardSF,opplayerTurnID);
+                if(validMovesSF.length>0){
+                    var boardsSF = newBoards(validMovesSF,nodeBoardSF,opplayerTurnID);
+                    for(var j=0;j<boardsSF.length;j++){//second level
+                        node.addChild({id:counter,name:boardsSF[j],parent:node.data.id,level:2,heuristic:100,move:validMovesSF[i],alpha:100,beta:-100});
+                        counter += 1;
+                    }
                 }
             }
-        }
-    })
-
-    tree.forEach(function(node){
-        if(node.data.level==2){
-            level = 3
-            var nodeBoardTF = node.data.name;
-            var validMovesTF = validMove(nodeBoardTF,opplayerTurnID);
-            if(validMovesTF.length>0){
-                var boardsTF = newBoards(validMovesTF,nodeBoardTF,playerTurnID);
-                for(var j=0;j<boardsTF.length;j++){//third level
-                    node.addChild({id:counter,name:boardsTF[j],parent:node.data.id,level:3,heuristic:0,move:validMovesTF[i]});
-                    counter += 1;
+        })
+    }
+    
+    if(level==2){
+        tree.forEach(function(node){
+            if(node.data.level==2){
+                level = 3
+                var nodeBoardTF = node.data.name;
+                var validMovesTF = validMove(nodeBoardTF,opplayerTurnID);
+                if(validMovesTF.length>0){
+                    var boardsTF = newBoards(validMovesTF,nodeBoardTF,playerTurnID);
+                    for(var j=0;j<boardsTF.length;j++){//third level
+                        node.addChild({id:counter,name:boardsTF[j],parent:node.data.id,level:3,heuristic:100,move:validMovesTF[i],alpha:100,beta:-100});
+                        counter += 1;
+                    }
                 }
             }
-        }
-    })
-
-    tree.forEach(function(node){
-        if(node.data.level==3){
-            level = 4
-            var nodeBoardFF = node.data.name;
-            var validMovesFF = validMove(nodeBoardFF,opplayerTurnID);
-            if(validMovesFF.length>0){
-                var boardsFF = newBoards(validMovesFF,nodeBoardFF,opplayerTurnID);
-                for(var j=0;j<boardsFF.length;j++){//fourth level
-                    node.addChild({id:counter,name:boardsFF[j],parent:node.data.id,level:4,heuristic:0,move:validMovesFF[i]});
-                    counter += 1;
+        })
+    }
+    
+    if(level==3){
+        tree.forEach(function(node){
+            if(node.data.level==3){
+                level = 4
+                var nodeBoardFF = node.data.name;
+                var validMovesFF = validMove(nodeBoardFF,opplayerTurnID);
+                if(validMovesFF.length>0){
+                    var boardsFF = newBoards(validMovesFF,nodeBoardFF,opplayerTurnID);
+                    for(var j=0;j<boardsFF.length;j++){//fourth level
+                        node.addChild({id:counter,name:boardsFF[j],parent:node.data.id,level:4,heuristic:0,move:validMovesFF[i]});
+                        counter += 1;
+                    }
                 }
             }
-        }
-    })
-
-    tree.forEach(function(node){
-        if(node.data.level==4){
-            level = 5
-            var nodeBoard5F = node.data.name;
-            var validMoves5F = validMove(nodeBoard5F,opplayerTurnID);
-            if(validMoves5F.length>0){
-                var boards5F = newBoards(validMoves5F,nodeBoard5F,playerTurnID);
-                for(var j=0;j<boards5F.length;j++){//fifth level
-                    node.addChild({id:counter,name:boards5F[j],parent:node.data.id,level:5,heuristic:0,move:validMoves5F[i]});
-                    counter += 1;
+        })
+    }
+    
+    /*if(level==4){
+        tree.forEach(function(node){
+            if(node.data.level==4){
+                level = 5
+                var nodeBoard5F = node.data.name;
+                var validMoves5F = validMove(nodeBoard5F,opplayerTurnID);
+                if(validMoves5F.length>0){
+                    var boards5F = newBoards(validMoves5F,nodeBoard5F,playerTurnID);
+                    for(var j=0;j<boards5F.length;j++){//fifth level
+                        node.addChild({id:counter,name:boards5F[j],parent:node.data.id,level:5,heuristic:0,move:validMoves5F[i]});
+                        counter += 1;
+                    }
                 }
             }
-        }
-    })
-
+        })
+    }**/
     return [tree,level];
 }
 
-function validMove(matrixBoard,lookingFor){
-    if(lookingFor==1){
-        var playerTurnID = 2
+function validMove(matrixBoard,playerTurnID){
+    if(playerTurnID==1){
+        var lookingFor = 2
     }
-    else if(lookingFor==2){
-        var playerTurnID = 1
+    else if(playerTurnID==2){
+        var lookingFor = 1
     }
     var posibleMoves = []
     for(var y=0;y<matrixBoard.length;y++){
-        var row = matrixBoard[y]
-        for(var x=0;x<row.length;x++){
-            if(row[x]==playerTurnID){
-                //upperRight
-                try {
-                    if(matrixBoard[y-1][x+1]==0){
-                        var position = 1
-                        while(true){
-                            try{
-                                var looking = matrixBoard[y+position][x-position]
-                            }
-                            catch(err) {break}
-                            if (looking == null){break}
-                            if(looking==lookingFor && !(posibleMoves.includes(""+(y-1).toString()+","+ (x+1).toString() +""))){
-                                posibleMoves.push(""+(y-1).toString()+","+ (x+1).toString() +"")
-                                break
-                            }
-                            position += 1 
-                        }
-                    }
-                }catch(err) {}
-
+        for(var x=0;x<matrixBoard[y].length;x++){
+            if(matrixBoard[y][x]==playerTurnID){
+                var position = 1
+                var ones = []
                 //up
-                try {
-                    if(matrixBoard[y-1][x]==0){
-                        var position = 1
-                        while(true){
-                            try{
-                                var looking = matrixBoard[y+position][x]
-                            }
-                            catch(err) {break}
-                            if (looking == null){break}
-                            if(looking==lookingFor && !(posibleMoves.includes(""+(y-1).toString()+","+ (x).toString() +""))){
-                                posibleMoves.push(""+(y-1).toString()+","+ (x).toString() +"")
-                                break
-                            }
-                            position += 1 
-                        }
+                while(true){
+                    try{
+                        var looking = matrixBoard[y-position][x]
                     }
-                }catch(err) {}
-
-                //upperLeft
-                try {
-                    if(matrixBoard[y-1][x-1]==0){
-                        var position = 1
-                        while(true){
-                            try{
-                                var looking = matrixBoard[y+position][x+position]
-                            }
-                            catch(err) {break}
-                            if (looking == null){break}
-                            if(looking==lookingFor && !(posibleMoves.includes(""+(y-1).toString()+","+ (x-1).toString() +""))){
-                                posibleMoves.push(""+(y-1).toString()+","+ (x-1).toString() +"")
-                                break
-                            }
-                            position += 1 
-                        }
+                    catch(err) {break;}
+                    if(looking==lookingFor){
+                        ones.push(1)
                     }
-                }catch(err) {}
+                    if (looking == null || (ones.length==0 && looking==0) || looking==playerTurnID || (looking==0 && ones.length>0 && (posibleMoves.includes(""+(y-position).toString()+","+ (x).toString() +"")))){break;}
+                    if(looking==0 && ones.length>0 && !(posibleMoves.includes(""+(y-position).toString()+","+ (x).toString() +""))){
+                        posibleMoves.push(""+(y-position).toString()+","+ (x).toString() +"")
+                        break
+                    }
+                    position += 1 
+                }
 
+                //down
+                var position = 1
+                var ones = []
+                while(true){
+                    try{
+                        var looking = matrixBoard[y+position][x]
+                    }
+                    catch(err) {break;}
+                    if(looking==lookingFor){
+                        ones.push(1)
+                    }
+                    if (looking == null || (ones.length==0 && looking==0) || looking==playerTurnID || (looking==0 && ones.length>0 && (posibleMoves.includes(""+(y+position).toString()+","+ (x).toString() +"")))){break;}
+                    if(looking==0 && ones.length>0 && !(posibleMoves.includes(""+(y+position).toString()+","+ (x).toString() +""))){
+                        posibleMoves.push(""+(y+position).toString()+","+ (x).toString() +"")
+                        break
+                    }
+                    position += 1 
+                }
 
                 //left
-                try {
-                    if(row[x-1]==0){
-                        var position = 1
-                        while(true){
-                            try{
-                                var looking = row[x+position]
-                            }
-                            catch(err) {break}
-                            if (looking == null){break}
-                            if(looking==lookingFor && !(posibleMoves.includes(""+(y).toString()+","+ (x-1).toString() +""))){
-                                posibleMoves.push(""+(y).toString()+","+ (x-1).toString() +"")
-                                break
-                            }
-                            position += 1 
-                        }
+                var position = 1
+                var ones = []
+                while(true){
+                    try{
+                        var looking = matrixBoard[y][x-position]
                     }
-                }catch(err) {}
-
-                //lowerLeft
-                try {
-                    if(matrixBoard[y+1][x-1]==0){
-                        var position = 1
-                        while(true){
-                            try{
-                                var looking = matrixBoard[y-position][x+position]
-                            }
-                            catch(err) {break}
-                            if (looking == null){break}
-                            if(looking==lookingFor && !(posibleMoves.includes(""+(y+1).toString()+","+ (x-1).toString() +""))){
-                                posibleMoves.push(""+(y+1).toString()+","+ (x-1).toString() +"")
-                                break
-                            }
-                            position += 1 
-                        }
+                    catch(err) {break;}
+                    if(looking==lookingFor){
+                        ones.push(1)
                     }
-                }catch(err) {}
-
-                //low
-                try {
-                    if(matrixBoard[y+1][x]==0){
-                        var position = 1
-                        while(true){
-                            try{
-                                var looking = matrixBoard[y-position][x]
-                            }
-                            catch(err) {break}
-                            if (looking == null){break}
-                            if(looking==lookingFor && !(posibleMoves.includes(""+(y+1).toString()+","+ (x).toString() +""))){
-                                posibleMoves.push(""+(y+1).toString()+","+ (x).toString() +"")
-                                break
-                            }
-                            position += 1 
-                        }
+                    if (looking == null || (ones.length==0 && looking==0) || looking==playerTurnID || (looking==0 && ones.length>0 && (posibleMoves.includes(""+(y).toString()+","+ (x-position).toString() +"")))){break;}
+                    if(looking==0 && ones.length>0 && !(posibleMoves.includes(""+(y).toString()+","+ (x-position).toString() +""))){
+                        posibleMoves.push(""+(y).toString()+","+ (x-position).toString() +"")
+                        break
                     }
-                }catch(err) {}
-
-                //lowerRight
-                try {
-                    if(matrixBoard[y+1][x+1]==0){
-                        var position = 1
-                        while(true){
-                            try{
-                                var looking = matrixBoard[y-position][x-position]
-                            }
-                            catch(err) {break}
-                            if (looking == null){break}
-                            if(looking==lookingFor && !(posibleMoves.includes(""+(y+1).toString()+","+ (x+1).toString() +""))){
-                                posibleMoves.push(""+(y+1).toString()+","+ (x+1).toString() +"")
-                                break
-                            }
-                            position += 1 
-                        }
-                    }
-                }catch(err) {}
+                    position += 1 
+                }
 
                 //right
-                try {
-                    if(row[x+1]==0){
-                        var position = 1
-                        while(true){
-                            try{
-                                var looking = row[x-position]
-                            }
-                            catch(err) {break}
-                            if (looking == null){break}
-                            if(looking==lookingFor && !(posibleMoves.includes(""+(y).toString()+","+ (x+1).toString() +""))){
-                                posibleMoves.push(""+(y).toString()+","+ (x+1).toString() +"")
-                                break
-                            }
-                            position += 1 
-                        }
+                var position = 1
+                var ones = []
+                while(true){
+                    try{
+                        var looking = matrixBoard[y][x+position]
                     }
-                }catch(err) {}
+                    catch(err) {break;}
+                    if(looking==lookingFor){
+                        ones.push(1)
+                    }
+                    if (looking == null || (ones.length==0 && looking==0) || looking==playerTurnID || (looking==0 && ones.length>0 && (posibleMoves.includes(""+(y).toString()+","+ (x+position).toString() +"")))){break;}
+                    if(looking==0 && ones.length>0 && !(posibleMoves.includes(""+(y).toString()+","+ (x+position).toString() +""))){
+                        posibleMoves.push(""+(y).toString()+","+ (x+position).toString() +"")
+                        break
+                    }
+                    position += 1 
+                }
+
+                //LowerRight
+                var position = 1
+                var ones = []
+                while(true){
+                    try{
+                        var looking = matrixBoard[y+position][x+position]
+                    }
+                    catch(err) {break;}
+                    if(looking==lookingFor){
+                        ones.push(1)
+                    }
+                    if (looking == null || (ones.length==0 && looking==0) || looking==playerTurnID || (looking==0 && ones.length>0 && (posibleMoves.includes(""+(y+position).toString()+","+ (x+position).toString() +"")))){break;}
+                    if(looking==0 && ones.length>0 && !(posibleMoves.includes(""+(y+position).toString()+","+ (x+position).toString() +""))){
+                        posibleMoves.push(""+(y+position).toString()+","+ (x+position).toString() +"")
+                        break
+                    }
+                    position += 1 
+                }
+
+                //LowerLeft
+                var position = 1
+                var ones = []
+                while(true){
+                    try{
+                        var looking = matrixBoard[y+position][x-position]
+                    }
+                    catch(err) {break;}
+                    if(looking==lookingFor){
+                        ones.push(1)
+                    }
+                    if (looking == null || (ones.length==0 && looking==0) || looking==playerTurnID || (looking==0 && ones.length>0 && (posibleMoves.includes(""+(y+position).toString()+","+ (x-position).toString() +"")))){break;}
+                    if(looking==0 && ones.length>0 && !(posibleMoves.includes(""+(y+position).toString()+","+ (x-position).toString() +""))){
+                        posibleMoves.push(""+(y+position).toString()+","+ (x-position).toString() +"")
+                        break
+                    }
+                    position += 1 
+                }
+
+                //UpperLeft
+                var position = 1
+                var ones = []
+                while(true){
+                    try{
+                        var looking = matrixBoard[y-position][x-position]
+                    }
+                    catch(err) {break;}
+                    if(looking==lookingFor){
+                        ones.push(1)
+                    }
+                    if (looking == null || (ones.length==0 && looking==0) || looking==playerTurnID || (looking==0 && ones.length>0 && (posibleMoves.includes(""+(y-position).toString()+","+ (x-position).toString() +"")))){break;}
+                    if(looking==0 && ones.length>0 && !(posibleMoves.includes(""+(y-position).toString()+","+ (x-position).toString() +""))){
+                        posibleMoves.push(""+(y-position).toString()+","+ (x-position).toString() +"")
+                        break
+                    }
+                    position += 1 
+                }
+
+                //UpperRight
+                var position = 1
+                var ones = []
+                while(true){
+                    try{
+                        var looking = matrixBoard[y-position][x+position]
+                    }
+                    catch(err) {break;}
+                    if(looking==lookingFor){
+                        ones.push(1)
+                    }
+                    if (looking == null || (ones.length==0 && looking==0) || looking==playerTurnID || (looking==0 && ones.length>0 && (posibleMoves.includes(""+(y-position).toString()+","+ (x+position).toString() +"")))){break;}
+                    if(looking==0 && ones.length>0 && !(posibleMoves.includes(""+(y-position).toString()+","+ (x+position).toString() +""))){
+                        posibleMoves.push(""+(y-position).toString()+","+ (x+position).toString() +"")
+                        break
+                    }
+                    position += 1 
+                }
+
+
+
+            }
+
+
+
             }
         }
-    }
+  
     return posibleMoves
 }
+
 
 function newBoards(moves,actualBoard,playerTurnID){
     var newboards = []
