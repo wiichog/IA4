@@ -8,11 +8,11 @@ var TreeNode = require('treenode').TreeNode;
 
 var userName = readline.question('May I have your name? ');
 var port = 4000// readline.question('May I have the port to connect? ');
-var tournamentID = 1221//readline.question('May I have the tournament id? ');
+var tournamentID = 142857//readline.question('May I have the tournament id? ');
 var fs = require('fs');
 
 
-var socket = require('socket.io-client')("http://127.0.0.1:"+ port +"");  // for example: http://127.0.0.1:3000
+var socket = require('socket.io-client')("http://192.168.1.142:"+ port +"");  // for example: http://127.0.0.1:3000
 socket.on('connect', function(){
     console.log("ok, the connection is ready")
     socket.emit('signin', {
